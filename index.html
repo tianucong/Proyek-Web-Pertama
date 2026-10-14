@@ -166,10 +166,8 @@
                   </h3>
                 </div>
 
-                <div
-                  class="flex items-center justify center pb-4 h-full text-slate-400 text-sm"
-                >
-                  <div class="flex flex-col p-4 mb-8">
+                <div class="w-full h-full">
+                  <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div
                       v-for="list in kumpulanList"
                       :key="list.id"
@@ -178,31 +176,35 @@
                       <h4 class="font-bold text-slate-400 text-lg mb-2">
                         {{list.nama}}
                       </h4>
-                      <span class="font-bold text-slate-300 text-md mb-1"
+                      <span
+                        class="font-bold text-slate-300 text-md truncate w-full"
                         >{{hitungPersentasePerList(list)}}%</span
                       >
                       <div
-                        class="relative w-28 h-16 flex justify-center items-center overflow-hidden my-1"
+                        class="relative w-28 h-16 flex justify-center items-center overflow-hidden"
                       >
                         <svg
-                          class="absolute top-0 w-full h-32"
-                          viewBox="0 0 100 50"
+                          class="w-full h-full transform -rotate-90"
+                          viewBox="0 0 100 100"
                         >
-                          <path
-                            d="M 10 45 A 35 35 0 0 1 90 45"
-                            fill="none"
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="40"
+                            fill="transparent"
                             stroke="#e2e8f0"
                             stroke-width="12"
-                            stroke-linecap="round"
                           />
-                          <path
-                            d="M 10 45 A 35 35 0 0 1 90 45"
-                            fill="none"
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="40"
+                            fill="transparent"
                             stroke="#22c55e"
                             stroke-width="12"
                             stroke-linecap="round"
-                            :stroke-dasharray="110"
-                            :stroke-dashoffset="110 - (110 * hitungPersentasePerList(list)) / 100"
+                            :stroke-dasharray="251.2"
+                            :stroke-dashoffset="251.2 - (251.2 * hitungPersentasePerList(list)) / 100"
                             class="transition-all duration-700 ease-out"
                           />
                         </svg>
