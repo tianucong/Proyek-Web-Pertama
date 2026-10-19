@@ -10,23 +10,15 @@
   </head>
 
   <body class="bg-slate-100 min-h-screen font-sans text-slate-800">
-    <div class="bg-slate-800 text-white text-center text-sm gap-2 p-4 flex justify-end items-center">
-        <span>Halo, {{ auth()->user()->name()}}</span>
-        <form method="POST" action="/logout">
-            @csrf
-            <button type="submit" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg font-semibold">
-                Logout
-            </button>
-        </form>
-</div>
 
 @verbatim
     <div id="app">
       <!-- buat bagian nav atas nya-->
 
       <nav class="bg-white border-b-2 border-slate-200 shadow-sm py-4 mb-8">
-        <div class="justify-center max-w-5xl mx-auto flex gap-6 px-4">
-          <button
+        <div class="relative max-w-5xl mx-auto flex justify-center items-center px-4">
+        <div class="flex gap-6">  
+        <button
             @click="menuAktif='progress'"
             :class="menuAktif==='progress'?'bg-blue-50 text-blue-600 rounded-xl justify-center py-2 px-2 ' : 'text-slate-500 hover:bg-slate-50'"
             class="font-bold pb-2 transition-all"
@@ -49,6 +41,18 @@
           >
             Character & Word Counter
           </button>
+          </div>
+          @endverbatim
+        <div class="absolute right-4 flex items-center gap-4">
+          <span class="text-sm font-semibold text-slate-700">Halo, {{ auth()->user()->name }}</span>
+          <form method="POST" action="/logout" class="m-0">
+            @csrf
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all">
+              Logout
+            </button>
+          </form>
+        </div>
+        @verbatim
         </div>
       </nav>
 

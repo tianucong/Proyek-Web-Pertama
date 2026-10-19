@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center">
+  <form method="POST" action="/login"
+        class="bg-white p-8 rounded-2xl shadow-md w-full max-w-sm flex flex-col gap-4">
+    @csrf
+
+    <h1 class="text-2xl font-bold text-center">Login</h1>
+
+    @if (session('sukses'))
+      <p class="bg-green-100 text-green-700 p-3 rounded-lg text-sm">{{ session('sukses') }}</p>
+    @endif
+
+    <div>
+      <input type="email" name="email" value="{{ old('email') }}" placeholder="Email"
+             class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500" />
+      @error('email') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+    </div>
+
+    <input type="password" name="password" placeholder="Password"
+           class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500" />
+
+    <button type="submit"
+            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl">
+      Masuk
+    </button>
+
+    <p class="text-sm text-center text-slate-500">
+      Belum punya akun? <a href="/register" class="text-blue-600 font-semibold">Daftar</a>
+    </p>
+  </form>
+</body>
+</html>

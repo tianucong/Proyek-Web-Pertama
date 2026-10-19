@@ -23,7 +23,7 @@ class AuthController extends Controller
 
         User::create($data);
 
-        return redirect('/register')->with('sukses', 'Akun berhasil dibuat!');
+        return redirect('/login')->with('sukses', 'Akun berhasil dibuat silahkan login!');
     }
 
         public function tampilLogin()

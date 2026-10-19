@@ -42,6 +42,9 @@
             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-xl">
       Daftar
     </button>
+    <p class="text-sm text-center text-slate-500">
+  Sudah punya akun? <a href="/login" class="text-blue-600 font-semibold">Login</a>
+</p>
   </form>
 </body>
 </html>
