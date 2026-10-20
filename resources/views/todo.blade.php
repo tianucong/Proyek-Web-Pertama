@@ -16,7 +16,7 @@
       <!-- buat bagian nav atas nya-->
 
       <nav class="bg-white border-b-2 border-slate-200 shadow-sm py-4 mb-8">
-        <div class="relative max-w-5xl mx-auto flex justify-center items-center px-4">
+        <div class="relative flex justify-center items-center px-4">
         <div class="flex gap-6">  
         <button
             @click="menuAktif='progress'"
