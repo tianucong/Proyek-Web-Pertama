@@ -16,4 +16,10 @@ Route::middleware('auth')->group(function () {
         return view('todo');
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+    use App\Http\Controllers\TodoController;
+    Route::get('/api/lists', [TodoController::class, 'index']);
+    Route::post('/api/lists', [TodoController::class, 'storeList']);
+    Route::post('/api/lists/{list}/tasks', [TodoController::class, 'storeTask']);
+    Route::patch('/api/tasks/{task}', [TodoController::class, 'updateTask']);
+    Route::delete('/api/tasks/{task}', [TodoController::class, 'destroyTask']);
 });

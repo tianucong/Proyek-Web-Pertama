@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Aplikasi Todo List Saya</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -414,13 +415,37 @@
       const { createApp, ref, computed, watch, onMounted } = Vue;
       createApp({
         setup() {
-          const dataTersimpan = localStorage.getItem("x");
-          const kumpulanList = ref(
-            dataTersimpan ? JSON.parse(dataTersimpan) : [],
-          );
-          const listAktif = ref(
-            kumpulanList.value.length > 0 ? kumpulanList.value[0] : null,
-          );
+
+
+ async function api(url, method = "GET", body = null) {
+  const respon = await fetch(url, {
+    method: method,
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+    },
+    body: body ? JSON.stringify(body) : null,
+  });
+
+  if (!respon.ok) {
+    alert("Gagal menghubungi server (kode " + respon.status + ")");
+    throw new Error("Request gagal: " + respon.status);
+  }
+
+  return respon.status === 204 ? null : respon.json();
+}
+
+
+
+          const kumpulanList = ref([]);
+          const listAktif = ref(null);
+          onMounted(async () => {
+        kumpulanList.value = await api("/api/lists");
+        if (kumpulanList.value.length > 0) {
+          listAktif.value = kumpulanList.value[0];
+          }
+          });
           const tugasBaru = ref("");
           const daftarTugas = ref([]);
           const menuAktif = ref("todo");
@@ -462,14 +487,8 @@
             return Math.round((taskSelesai.value / totalTask.value) * 100);
           });
 
-          watch(
-            kumpulanList,
-            (nilaiBaru) => {
-              const dataString = JSON.stringify(nilaiBaru);
-              localStorage.setItem("x", dataString);
-            },
-            { deep: true },
-          );
+          
+
 
           function hitungPersentasePerList(list) {
             let total = list.tugas.length;
@@ -478,47 +497,44 @@
             return Math.round((selesai / total) * 100);
           }
 
-          function tambahListBaru() {
-            const namaBaru = prompt("Masukkan nama list baru");
-            if (namaBaru && namaBaru.trim() !== "") {
-              if (namaBaru.length > 20) {
-                return alert("Panjang max 20 karakter");
-              }
-              const listBaru = {
-                id: Date.now(),
-                nama: namaBaru.trim(),
-                tugas: [],
-              };
-              kumpulanList.value.push(listBaru);
-              listAktif.value = listBaru;
-            }
-          }
-          function tambahTugas() {
-            if (tugasBaru.value.trim() === "") return alert("Isi dulu bro!");
-            listAktif.value.tugas.push({
-              id: Date.now(),
-              teks: tugasBaru.value,
-              waktu: waktuBaru.value,
-              selesai: false,
+  async function tambahListBaru() {
+  const namaBaru = prompt("Masukkan nama list baru");
+  if (namaBaru && namaBaru.trim() !== "") {
+    if (namaBaru.length > 20) {
+      return alert("Panjang max 20 karakter");
+    }
+    const listBaru = await api("/api/lists", "POST", { nama: namaBaru.trim() });
+    kumpulanList.value.push(listBaru);
+    listAktif.value = listBaru;
+  }
+}
+          async function tambahTugas(){
+            if(tugasBaru.value.trim()==="")return alert("Isi dulu bro!");
+            const list = listAktif.value;
+            const tugasDariSever=await api(`/api/lists/${list.id}/tasks`,"POST",{
+              teks:tugasBaru.value,
+              waktu:waktuBaru.value,
             });
-            tugasBaru.value = "";
-            waktuBaru.value = "";
+            list.tugas.push(tugasDariServer);
+            tugasBaru.value="";
+            waktuBaru.value="";
           }
-          function hapusTugas(idTugas) {
-            const index = listAktif.value.tugas.findIndex(
-              (x) => x.id === idTugas,
-            );
-            if (index !== -1) {
-              listAktif.value.tugas.splice(index, 1);
+         
+          async function hapusTugas(idTugas) {
+            await api(`/api/tasks/${idTugas}`,"DELETE");
+            const index=listAktif.value.tugas.findIndex((x)=>x.id==idTugas);
+            if(index !==-1){
+              listAktif.value.tugas.splice(index,1);
             }
           }
 
-          function coretTugas(idTugas) {
+          async function coretTugas(idTugas) {
             const tugas = listAktif.value.tugas.find((x) => x.id === idTugas);
-            if (tugas) {
-              tugas.selesai = !tugas.selesai;
-            }
-          }
+            if(!tugas) return;
+            const nilaiBaru=!tugas.selesai;
+            await api(`/api/tasks/${idTugas})`,"PATCH",{selesai:nilaiBaru});
+            tugas.selesai=nilaiBaru;
+}
 
           const tugasTersortir = computed(() => {
             if (!listAktif.value) return [];
