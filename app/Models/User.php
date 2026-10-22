@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\TodoList;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -28,5 +28,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    public function todoLists()
+    {
+        return $this->hasMany(TodoList::class);
     }
 }
