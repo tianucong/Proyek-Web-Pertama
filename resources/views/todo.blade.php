@@ -511,7 +511,7 @@
           async function tambahTugas(){
             if(tugasBaru.value.trim()==="")return alert("Isi dulu bro!");
             const list = listAktif.value;
-            const tugasDariSever=await api(`/api/lists/${list.id}/tasks`,"POST",{
+            const tugasDariServer=await api(`/api/lists/${list.id}/tasks`,"POST",{
               teks:tugasBaru.value,
               waktu:waktuBaru.value,
             });
@@ -532,7 +532,7 @@
             const tugas = listAktif.value.tugas.find((x) => x.id === idTugas);
             if(!tugas) return;
             const nilaiBaru=!tugas.selesai;
-            await api(`/api/tasks/${idTugas})`,"PATCH",{selesai:nilaiBaru});
+            await api(`/api/tasks/${idTugas}`,"PATCH",{selesai:nilaiBaru});
             tugas.selesai=nilaiBaru;
 }
 
