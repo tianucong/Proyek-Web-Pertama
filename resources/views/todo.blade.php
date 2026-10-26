@@ -346,7 +346,7 @@
 
                     <span
                       @click="coretTugas(tugas.id)"
-                      :class="{'line-through text-slate-300 font-italic': tugas.selesai}"
+                      :class="{'line-through text-slate-200 font-italic': tugas.selesai}"
                       class="cursor-pointer font-medium text-slate-700 transition-all select-none"
                     >
                       {{ tugas.teks}}
@@ -520,13 +520,34 @@
             waktuBaru.value="";
           }
          
-          async function hapusTugas(idTugas) {
-            await api(`/api/tasks/${idTugas}`,"DELETE");
-            const index=listAktif.value.tugas.findIndex((x)=>x.id==idTugas);
-            if(index !==-1){
-              listAktif.value.tugas.splice(index,1);
-            }
+         const  sedangDihapus=new Set();
+
+         async function hapusTugas(idTugas){
+          if(sedangDihapus.has(idTugas)){
+            return;
           }
+          sedangDihapus.add(idTugas);
+          
+          const daftar=listAktif.value.tugas
+          const index=daftar.findIndex((x)=>x.id===idTugas);
+          if(index===-1){
+            sedangDihapus.delete(idTugas);
+          return;
+          }
+
+          const [tugasDihapus]=daftar.splice(index,1);
+
+          try{
+            await api(`/api/tasks/${idTugas}`,"DELETE");
+          }
+          catch(e){
+            daftar.splice(index,0,tugasDihapus);
+          }
+          finally{
+            sedangDihapus.delete(idTugas);
+          }
+         }
+
 
           async function coretTugas(idTugas) {
             const tugas = listAktif.value.tugas.find((x) => x.id === idTugas);
@@ -563,6 +584,8 @@
             taskBelumSelesai,
             persentaseTotal,
             hitungPersentasePerList,
+            sedangDihapus,
+            hapusTugas
           };
         },
       }).mount("#app");
