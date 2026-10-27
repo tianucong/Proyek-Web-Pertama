@@ -48,8 +48,10 @@
           <span class="text-sm font-semibold text-slate-700">Halo, {{ auth()->user()->name }}</span>
           <form method="POST" action="/logout" class="m-0">
             @csrf
-            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all">
-              Logout
+            <button type="submit" hover:text-slate-700 text-slate-500 px-4 py-2 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+          </svg>
             </button>
           </form>
         </div>
@@ -363,9 +365,11 @@
 
                     <button
                       @click="hapusTugas(tugas.id)"
-                      class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-sm font-semibold rounded-lg shrink-0"
+                      class="hover:text-slate-700 text-slate-500 px-4 py-2 text-sm font-semibold shrink-0"
                     >
-                      Hapus
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                      </svg>
                     </button>
                   </div>
                 </li>
@@ -417,24 +421,24 @@
         setup() {
 
 
- async function api(url, method = "GET", body = null) {
-  const respon = await fetch(url, {
-    method: method,
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-    },
-    body: body ? JSON.stringify(body) : null,
-  });
+      async function api(url, method = "GET", body = null) {
+      const respon = await fetch(url, {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+        },
+          body: body ? JSON.stringify(body) : null,
+        });
 
-  if (!respon.ok) {
-    alert("Gagal menghubungi server (kode " + respon.status + ")");
-    throw new Error("Request gagal: " + respon.status);
-  }
+        if (!respon.ok) {
+        alert("Gagal menghubungi server (kode " + respon.status + ")");
+        throw new Error("Request gagal: " + respon.status);
+        }
 
-  return respon.status === 204 ? null : respon.json();
-}
+        return respon.status === 204 ? null : respon.json();
+      }
 
 
 
@@ -497,17 +501,17 @@
             return Math.round((selesai / total) * 100);
           }
 
-  async function tambahListBaru() {
-  const namaBaru = prompt("Masukkan nama list baru");
-  if (namaBaru && namaBaru.trim() !== "") {
-    if (namaBaru.length > 20) {
-      return alert("Panjang max 20 karakter");
-    }
-    const listBaru = await api("/api/lists", "POST", { nama: namaBaru.trim() });
-    kumpulanList.value.push(listBaru);
-    listAktif.value = listBaru;
-  }
-}
+        async function tambahListBaru() {
+        const namaBaru = prompt("Masukkan nama list baru");
+        if (namaBaru && namaBaru.trim() !== "") {
+        if (namaBaru.length > 20) {
+        return alert("Panjang max 20 karakter");
+        }
+        const listBaru = await api("/api/lists", "POST", { nama: namaBaru.trim() });
+        kumpulanList.value.push(listBaru);
+        listAktif.value = listBaru;
+        }
+        }
           async function tambahTugas(){
             if(tugasBaru.value.trim()==="")return alert("Isi dulu bro!");
             const list = listAktif.value;
