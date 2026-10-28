@@ -3,12 +3,14 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfilController;
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'tampilRegister']);
     Route::post('/register', [AuthController::class, 'register']);
     Route::get('/login', [AuthController::class, 'tampilLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/api/profil', [ProfilController::class, 'update']);
 });
 
 Route::middleware('auth')->group(function () {

@@ -33,4 +33,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(TodoList::class);
     }
+
+    public function dataProfi():array{
+        return [
+            'name'=>$this->name,
+            'email'=>$this->email,
+            'bio'=>$this->bio,
+            'foto_url'=>$this->foto ?asset('storage/' . $this->foto) : null,
+        ];
+    }
 }
