@@ -82,7 +82,72 @@
           >
             <div class="lg:w-1/3 flex flex-col gap-6">
               
-            <!--besok lanjut disini buat ui nya profil-->
+            <div class="bg-slate-50 rounded-2xl shadow-md border border-slate-200 p-6 min-h-[150px]">
+              <div class="flex items-center justify-between mb-4">
+   
+          <div class="invisible pointer-events-none text-sm font-semibold px-3 py-1">
+            Edit
+          </div>
+    
+          <h3 class="font-bold text-lg text-slate-700">Profil Saya</h3>
+    
+          <button v-if="!modeEdit" @click="mulaiEdit" 
+            class="text-sm font-semibold text-blue-600 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors">
+            Edit
+          </button>
+            </div>
+
+                <div v-if="!modeEdit" class="flex items-center gap-5">
+            <img v-if="profil.foto_url" :src="profil.foto_url" alt="Foto profil"
+                class="w-24 h-24 rounded-full object-cover border-4 border-white shadow shrink-0">
+            <div v-else
+                class="w-24 h-24 rounded-full bg-blue-500 text-white text-3xl font-bold flex items-center justify-center shrink-0">
+              {{ inisial }}
+            </div>
+
+            <div class="min-w-0">
+              <p class="font-bold text-lg text-slate-800 break-words">{{ profil.name }}</p>
+              <p class="text-sm text-slate-500 mt-1 break-words">
+                {{ profil.bio || 'Belum ada bio. Klik Edit untuk menambahkan.' }}
+              </p>
+            </div>
+          </div>
+
+          <div v-else class="flex flex-col gap-3">
+            <div class="flex items-center gap-4">
+              <img v-if="previewFoto || profil.foto_url" :src="previewFoto || profil.foto_url" alt="Foto profil" 
+                  class="w-20 h-20 rounded-full object-cover border-4 border-white shadow shrink-0">
+              <div v-else 
+                  class="w-20 h-20 rounded-full bg-blue-500 text-white text-2xl font-bold flex items-center justify-center shrink-0">
+                {{ inisial }}
+              </div>
+
+              <label class="cursor-pointer text-sm font-semibold bg-white border-2 border-slate-200 hover:border-blue-500 px-3 py-2 rounded-xl transition-colors">
+                Pilih Foto
+                <input type="file" accept="image/png,image/jpeg,image/webp" @change="pilihFoto" class="hidden">
+              </label>
+            </div>
+
+            <input v-model="formNama" type="text" maxlength="50" placeholder="Nama" 
+            class="w-full px-4 py-2 border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500 transition-colors">
+            <textarea v-model="formBio" maxlength="160" rows="3" placeholder="Bio singkat tentang kamu..." 
+              class="w-full px-4 py-2 border-2 border-slate-200 rounded-xl outline-none focus:border-blue-500 transition-colors resize-none"></textarea>
+
+              <p class="text-xs text-slate-400 text-right">{{ formBio.length }}/160</p>
+
+              <div class="flex gap-2 justify-end">
+                  <button @click="batalEdit" 
+                          class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
+                    Batal
+                  </button>
+                  <button @click="simpanProfil" :disabled="sedangMenyimpan" 
+                          class="px-4 py-2 text-sm font-semibold bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors disabled:opacity-50">
+                    {{ sedangMenyimpan ? 'Menyimpan...' : 'Simpan' }}
+                  </button>
+                </div>
+              </div>
+
+            </div>
 
               <div
                 class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 min-h-[250px] flex flex-col items-center justify-center"
@@ -421,28 +486,43 @@
 
 
       async function api(url, method = "GET", body = null) {
-      const respon = await fetch(url, {
-          method: method,
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
-        },
-          body: body ? JSON.stringify(body) : null,
-        });
-
-        if (!respon.ok) {
-        alert("Gagal menghubungi server (kode " + respon.status + ")");
-        throw new Error("Request gagal: " + respon.status);
+      const adaFile=body instanceof FormData;
+      const headers={
+        "Accept":"application/json",
+        "X-CSRF-TOKEN":document.querySelector('meta[name="csrf-token"]').content,
+      };
+      if(!adaFile){
+        headers["Content-Type"]="application/json";
+      }
+      const respon=await fetch(url,{
+        method: method,
+        headers: headers,
+        body: body ? (adaFile? body : JSON.stringify(body)) :null,
+      });
+      if(!respon.ok){
+        let pesan="Gagal menghubungi server (kode " + respon.status + ")";
+        if(respon.status===422){
+          const galat=await respon.json();
+          pesan=Object.values(galat.errors)[0][0];
         }
-
-        return respon.status === 204 ? null : respon.json();
+        alert(pesan);
+        throw new Error("Request gagal; " + respon.status);
+      }
+      return respon.status==204 ? null : respon.json();
       }
 
 
 
           const kumpulanList = ref([]);
           const listAktif = ref(null);
+          const profil = ref(window.PROFIL_AWAL);
+          const modeEdit=ref(false);
+          const formNama=ref("");
+          const formBio=ref("");
+          const fileFoto=ref(null);
+          const previewFoto=ref(null);
+          const sedangMenyimpan=ref(false);
+          const inisial=computed(()=>profil.value.name.charAt(0).toUpperCase());
           onMounted(async () => {
         kumpulanList.value = await api("/api/lists");
         if (kumpulanList.value.length > 0) {
