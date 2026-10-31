@@ -4,15 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
+     <script>
+      window.PROFIL_AWAL=@json(auth()->user()->dataProfil());
+    </script>
     <title>Aplikasi Todo List Saya</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script>
-      window.PROFIL_AWAL=@json(auth()->user()->dataProfil());
-    </script>
-  </head>
-
+</head>
   <body class="bg-slate-100 min-h-screen font-sans text-slate-800">
 
 @verbatim
@@ -591,17 +590,17 @@
         listAktif.value = listBaru;
         }
         }
-          async function tambahTugas(){
-            if(tugasBaru.value.trim()==="")return alert("Isi dulu bro!");
-            const list = listAktif.value;
-            const tugasDariServer=await api(`/api/lists/${list.id}/tasks`,"POST",{
-              teks:tugasBaru.value,
-              waktu:waktuBaru.value,
-            });
-            list.tugas.push(tugasDariServer);
-            tugasBaru.value="";
-            waktuBaru.value="";
-          }
+        async function tambahTugas(){
+          if(tugasBaru.value.trim()==="")return alert("Isi dulu bro!");
+          const list = listAktif.value;
+          const tugasDariServer=await api(`/api/lists/${list.id}/tasks`,"POST",{
+            teks:tugasBaru.value,
+            waktu:waktuBaru.value,
+          });
+          list.tugas.push(tugasDariServer);
+          tugasBaru.value="";
+          waktuBaru.value="";
+        }
          
          const  sedangDihapus=new Set();
 
@@ -628,6 +627,47 @@
           }
           finally{
             sedangDihapus.delete(idTugas);
+          }
+         }
+
+         function mulaiEdit(){
+          formNama.value=profil.value.name;
+          formBio.value=profil.value.bio||"";
+          modeEdit.value=true;
+          fileFoto.value=null;
+          previewFoto.value=null;
+         }
+
+         function batalEdit(){
+          modeEdit.value=false;
+         }
+
+         function pilihFoto(event){
+          const file=event.target.files[0];
+          if(!file){
+            return;
+          }
+          fileFoto.value=file;
+          previewFoto.value=URL.createObjectURL(file);
+         }
+
+         async function simpanProfil(){
+          if(formNama.value.trim()===""){
+            return alert("Nama tidak boleh kosong");
+          }
+          const data=new FormData();
+          data.append("name",formNama.value.trim());
+          data.append("bio",formBio.value.trim());
+          if(fileFoto.value){
+            data.append ("foto",fileFoto.value);
+          }
+          sedangMenyimpan.value=true;
+          try{
+            profil.value=await api("/api/profil","POST",data);
+            modeEdit.value=false;
+          }
+          finally{
+            sedangMenyimpan.value=false;
           }
          }
 
@@ -668,7 +708,19 @@
             persentaseTotal,
             hitungPersentasePerList,
             sedangDihapus,
-            hapusTugas
+            hapusTugas,
+            profil,
+            modeEdit,
+            formNama,
+            formBio,
+            previewFoto,
+            sedangMenyimpan,
+            inisial,
+            mulaiEdit,
+            batalEdit,
+            pilihFoto,
+            simpanProfil
+
           };
         },
       }).mount("#app");
