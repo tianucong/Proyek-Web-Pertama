@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
      <script>
-      window.PROFIL_AWAL=@json(auth()->user()->dataProfil());
+      window.APP={
+        sudahLogin:@json(auth()->check()),
+        profil=@json(auth()->check()?auth()->user()->dataProfil():null),
+      };
     </script>
     <title>Aplikasi Todo List Saya</title>
 
@@ -46,6 +49,7 @@
           </button>
           </div>
           @endverbatim
+          @auth
         <div class="absolute right-4 flex items-center gap-4">
           <img v-if="profil.foto_url" :src="profil.foto_url" :title="profil.name" alt="Foto profil" 
             class="w-10 h-10 rounded-full object-cover border-2 border-slate-200">
@@ -61,6 +65,11 @@
             </button>
           </form>
         </div>
+        @endauth
+        @guest
+        <div class="flex items-center gap-2">
+          <a href="/login" class="text-sm font-semibold text-slate-600 hover:bg-slate-100 px-3 py-2 rounded-lg">Login</a>
+          <a href="/register" class="text-sm font-semibold bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg">Daftar</a>
         @verbatim
         </div>
       </nav>

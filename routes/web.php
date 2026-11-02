@@ -13,6 +13,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/api/profil', [ProfilController::class, 'update']);
 });
 
+Route::get('/',function(){
+    return view('todo');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return view('todo');
