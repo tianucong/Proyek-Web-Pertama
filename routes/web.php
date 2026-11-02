@@ -23,4 +23,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/api/lists/{list}/tasks', [TodoController::class, 'storeTask']);
     Route::patch('/api/tasks/{task}', [TodoController::class, 'updateTask']);
     Route::delete('/api/tasks/{task}', [TodoController::class, 'destroyTask']);
+    Route::post('/api/profil', [ProfilController::class, 'update']);
 });

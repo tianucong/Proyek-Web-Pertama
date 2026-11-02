@@ -54,7 +54,7 @@
           </div>
           <form method="POST" action="/logout" class="m-0">
             @csrf
-            <button type="submit" hover:text-slate-700 text-slate-500 px-4 py-2 transition-all">
+          <button type="submit" class="hover:text-slate-700 text-slate-500 px-4 py-2 transition-all">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
           </svg>
@@ -485,30 +485,42 @@
 
 
       async function api(url, method = "GET", body = null) {
-      const adaFile=body instanceof FormData;
-      const headers={
-        "Accept":"application/json",
-        "X-CSRF-TOKEN":document.querySelector('meta[name="csrf-token"]').content,
+      const adaFile = body instanceof FormData;
+
+      const headers = {
+        "Accept": "application/json",
+        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
       };
-      if(!adaFile){
-        headers["Content-Type"]="application/json";
+      if (!adaFile) {
+        headers["Content-Type"] = "application/json";
       }
-      const respon=await fetch(url,{
+
+      const respon = await fetch(url, {
         method: method,
         headers: headers,
-        body: body ? (adaFile? body : JSON.stringify(body)) :null,
+        body: body ? (adaFile ? body : JSON.stringify(body)) : null,
       });
-      if(!respon.ok){
-        let pesan="Gagal menghubungi server (kode " + respon.status + ")";
-        if(respon.status===422){
-          const galat=await respon.json();
-          pesan=Object.values(galat.errors)[0][0];
+
+      if (!respon.ok) {
+        let pesan = "Gagal menghubungi server (kode " + respon.status + ")";
+        if (respon.status === 422) {
+          const galat = await respon.json();
+          pesan = Object.values(galat.errors)[0][0];
         }
         alert(pesan);
-        throw new Error("Request gagal; " + respon.status);
+        throw new Error("Request gagal: " + respon.status);
       }
-      return respon.status==204 ? null : respon.json();
+
+      if (respon.status === 204) return null;
+
+      const tipe = respon.headers.get("content-type") || "";
+      if (!tipe.includes("application/json")) {
+        alert("Server membalas bukan JSON. Cek tab Network.");
+        throw new Error("Respons bukan JSON, status " + respon.status);
       }
+
+      return respon.json();
+    }
 
 
 
@@ -657,7 +669,7 @@
           }
           const data=new FormData();
           data.append("name",formNama.value.trim());
-          data.append("bio",formBio.value.trim());
+          data.append("bio",(formBio.value||"").trim());
           if(fileFoto.value){
             data.append ("foto",fileFoto.value);
           }
@@ -665,6 +677,9 @@
           try{
             profil.value=await api("/api/profil","POST",data);
             modeEdit.value=false;
+          }
+          catch(error){
+            console.error("Gagal menyimpan profil:", error);
           }
           finally{
             sedangMenyimpan.value=false;

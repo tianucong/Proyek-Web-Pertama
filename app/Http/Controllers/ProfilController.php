@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -33,7 +31,7 @@ class ProfilController extends Controller
             $user->foto = $request->file('foto')->store('foto-profil', 'public');
         }
         $user->save();
-        return $user->dataProfil();
+        return response()->json($user->dataProfil());
     
 }
 
