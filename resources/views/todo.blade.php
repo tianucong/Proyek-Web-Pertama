@@ -70,9 +70,14 @@
         <div class="flex items-center gap-2">
           <a href="/login" class="text-sm font-semibold text-slate-600 hover:bg-slate-100 px-3 py-2 rounded-lg">Login</a>
           <a href="/register" class="text-sm font-semibold bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg">Daftar</a>
+      </div>
+      @endguest
         @verbatim
         </div>
       </nav>
+      <div v-if="!sudahLogin" class="bg-amber-100 items-center text-sm px-4 py-2 mb-6">
+        <a href="/register" class="font-semibold underline">Daftar</a> untuk menyimpan permanen.
+      </div>
 
       <!--untuk konten yang ditampilkan dibawah-->
 
@@ -90,7 +95,7 @@
           >
             <div class="lg:w-1/3 flex flex-col gap-6">
               
-            <div class="bg-slate-50 rounded-2xl shadow-md border border-slate-200 p-6 min-h-[150px]">
+            <div v-if="sudahLogin" class="bg-slate-50 rounded-2xl shadow-md border border-slate-200 p-6 min-h-[150px]">
               <div class="flex items-center justify-between mb-4">
    
           <div class="invisible pointer-events-none text-sm font-semibold px-3 py-1">
@@ -156,6 +161,11 @@
               </div>
 
             </div>
+
+            <div v-else class="bg-slate-50 rounded-2xl shadow-md border border-slate-200 p-6 min-h-[150px] flex flex-col items-center justify-center text-center gap-3">
+            <p class="font-bold text-slate-700">Kamu memakai mode tamu</p>
+            <a href="/login" class="text-blue text-sm font-semibold underline px-4 py-2 rounded-lg">Login</a>
+          </div>
 
               <div
                 class="bg-slate-50 p-6 rounded-2xl shadow-sm border border-slate-200 min-h-[250px] flex flex-col items-center justify-center"
@@ -535,20 +545,43 @@
 
           const kumpulanList = ref([]);
           const listAktif = ref(null);
-          const profil = ref(window.PROFIL_AWAL);
+          const profil = ref(window.APP.profil);
           const modeEdit=ref(false);
           const formNama=ref("");
           const formBio=ref("");
           const fileFoto=ref(null);
           const previewFoto=ref(null);
           const sedangMenyimpan=ref(false);
-          const inisial=computed(()=>profil.value.name.charAt(0).toUpperCase());
-          onMounted(async () => {
-        kumpulanList.value = await api("/api/lists");
-        if (kumpulanList.value.length > 0) {
-          listAktif.value = kumpulanList.value[0];
-          }
+          const inisial=computed(()=>{
+            return profil.value?.name?.charAt(0).toUpperCase()??"";
           });
+          const sudahLogin=window.APP.sudahLogin;
+          const KUNCI_TAMU="todo_tamu";
+          onMounted(async () => {
+            if(sudahLogin){
+              kumpulanList.value=await api("/api/lists");
+            }
+            else{
+              try{
+                const tersimpan=sessionStorage.getItem(KUNCI_TAMU);
+                kumpulanList.value=tersimpan?JSON.parse(tersimpan):[];
+              }
+              catch(e){
+                kumpulanList.value=[];
+              }
+            }
+            if(kumpulanList.value.length>0){
+              listAktif.value=kumpulanList.value[0];
+            }
+          });
+          watch(
+            kumpulanList, (nilaiBaru)=>{
+              if(!sudahLogin){
+                sessionStorage.setItem(KUNCI_TAMU,JSON.stringify(nilaiBaru));
+              }
+            },
+            {deep: true},
+          );
           const tugasBaru = ref("");
           const daftarTugas = ref([]);
           const menuAktif = ref("todo");
@@ -606,11 +639,22 @@
         if (namaBaru.length > 20) {
         return alert("Panjang max 20 karakter");
         }
-        const listBaru = await api("/api/lists", "POST", { nama: namaBaru.trim() });
+        let listBaru;
+        if(sudahLogin){
+        listBaru = await api("/api/lists", "POST", { nama: namaBaru.trim() });
+        }
+        else{
+          listBaru={
+            id:Date.now(), nama:namaBaru.trim(), tugas:[]
+          };
+        }
         kumpulanList.value.push(listBaru);
         listAktif.value = listBaru;
         }
         }
+
+          /*Besok lanjut disini*/
+          
         async function tambahTugas(){
           if(tugasBaru.value.trim()==="")return alert("Isi dulu bro!");
           const list = listAktif.value;
