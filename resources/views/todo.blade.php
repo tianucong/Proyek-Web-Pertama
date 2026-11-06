@@ -7,7 +7,7 @@
      <script>
       window.APP={
         sudahLogin:@json(auth()->check()),
-        profil=@json(auth()->check()?auth()->user()->dataProfil():null),
+        profil: @json(auth()->check()?auth()->user()->dataProfil():null),
       };
     </script>
     <title>Aplikasi Todo List Saya</title>
@@ -21,7 +21,7 @@
     <div id="app">
       <!-- buat bagian nav atas nya-->
 
-      <nav class="bg-white border-b-2 border-slate-200 shadow-sm py-4 mb-8">
+      <nav class="bg-white border-b-2 border-slate-200 shadow-sm py-4 ">
         <div class="relative flex justify-center items-center px-4">
         <div class="flex gap-6">  
         <button
@@ -75,7 +75,7 @@
         @verbatim
         </div>
       </nav>
-      <div v-if="!sudahLogin" class="bg-amber-100 items-center text-sm px-4 py-2 mb-6">
+      <div v-if="!sudahLogin" class="bg-amber-100 flex justify-center items-center gap-2 text-sm px-4 py-2 mb-6">
         <a href="/register" class="font-semibold underline">Daftar</a> untuk menyimpan permanen.
       </div>
 
@@ -164,7 +164,7 @@
 
             <div v-else class="bg-slate-50 rounded-2xl shadow-md border border-slate-200 p-6 min-h-[150px] flex flex-col items-center justify-center text-center gap-3">
             <p class="font-bold text-slate-700">Kamu memakai mode tamu</p>
-            <a href="/login" class="text-blue text-sm font-semibold underline px-4 py-2 rounded-lg">Login</a>
+            <a href="/login" class="text-blue-600 text-sm font-semibold underline px-4 py-2 rounded-lg">Login</a>
           </div>
 
               <div
@@ -347,7 +347,7 @@
                   v-for="list in kumpulanList"
                   :key="list.id"
                   @click="listAktif = list"
-                  :class="listAktif.id === list.id ? 'bg-blue-100 text-blue-700 font-bold border-l-4 border-blue-600' : 'text-slate-600 hover:bg-slate-200'"
+                  :class="listAktif?.id === list.id ? 'bg-blue-100 text-blue-700 font-bold border-l-4 border-blue-600' : 'text-slate-600 hover:bg-slate-200'"
                   class="cursor-pointer p-3 rounded-lg transition-all flex justify-between items-center select-none"
                 >
                   {{ list.nama }}
@@ -653,45 +653,42 @@
         }
         }
 
-          /*Besok lanjut disini*/
           
         async function tambahTugas(){
-          if(tugasBaru.value.trim()==="")return alert("Isi dulu bro!");
+          if(tugasBaru.value.trim()===""){
+            return alert("Isi dulu bro!");
+          }
           const list = listAktif.value;
-          const tugasDariServer=await api(`/api/lists/${list.id}/tasks`,"POST",{
+          let tugasDibuat;
+          if(sudahLogin){
+          tugasDibuat =await api(`/api/lists/${list.id}/tasks`,"POST",{
             teks:tugasBaru.value,
             waktu:waktuBaru.value,
           });
-          list.tugas.push(tugasDariServer);
-          tugasBaru.value="";
-          waktuBaru.value="";
+          }
+          else{
+          tugasDibuat={
+            id:Date.now(),
+            teks:tugasBaru.value,
+            waktu:waktuBaru.value,
+            selesai:false,
+
+          };
         }
+        list.tugas.push(tugasDibuat);
+        tugasBaru.value="";
+        waktuBaru.value="";
+      }
          
          const  sedangDihapus=new Set();
 
          async function hapusTugas(idTugas){
-          if(sedangDihapus.has(idTugas)){
-            return;
-          }
-          sedangDihapus.add(idTugas);
-          
-          const daftar=listAktif.value.tugas
-          const index=daftar.findIndex((x)=>x.id===idTugas);
-          if(index===-1){
-            sedangDihapus.delete(idTugas);
-          return;
-          }
-
-          const [tugasDihapus]=daftar.splice(index,1);
-
-          try{
+          if(sudahLogin){
             await api(`/api/tasks/${idTugas}`,"DELETE");
           }
-          catch(e){
-            daftar.splice(index,0,tugasDihapus);
-          }
-          finally{
-            sedangDihapus.delete(idTugas);
+          const index = listAktif.value.tugas.findIndex((x)=>x.id===idTugas);
+          if(index!==-1){
+            listAktif.value.tugas.splice(index,1);
           }
          }
 
@@ -744,17 +741,22 @@
             const tugas = listAktif.value.tugas.find((x) => x.id === idTugas);
             if(!tugas) return;
             const nilaiBaru=!tugas.selesai;
+            if(sudahLogin){
             await api(`/api/tasks/${idTugas}`,"PATCH",{selesai:nilaiBaru});
+            }
             tugas.selesai=nilaiBaru;
-}
+            }
 
           const tugasTersortir = computed(() => {
-            if (!listAktif.value) return [];
-            return [...listAktif.value.tugas].sort((a, b) => {
-              if (a.selesai !== b.selesai) return a.selesai ? 1 : -1;
-              return new Date(a.waktu) - new Date(b.waktu);
-            });
+          if (!listAktif.value) return [];
+          return [...listAktif.value.tugas].sort((a, b) => {
+            if (a.selesai !== b.selesai) return a.selesai ? 1 : -1;
+            if (!a.waktu && !b.waktu) return 0;
+            if (!a.waktu) return 1;
+            if (!b.waktu) return -1;
+            return new Date(a.waktu) - new Date(b.waktu);
           });
+        });
 
           return {
             kumpulanList,
