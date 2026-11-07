@@ -5,6 +5,10 @@ use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfilController;
 
+Route::get('/',function(){
+    return view('todo');
+}); 
+
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'tampilRegister']);
     Route::post('/register', [AuthController::class, 'register']);
@@ -13,14 +17,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/api/profil', [ProfilController::class, 'update']);
 });
 
-Route::get('/',function(){
-    return view('todo');
-});
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('todo');
-    });
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/api/lists', [TodoController::class, 'index']);
     Route::post('/api/lists', [TodoController::class, 'storeList']);

@@ -21,9 +21,19 @@
     <div id="app">
       <!-- buat bagian nav atas nya-->
 
-      <nav class="bg-white border-b-2 border-slate-200 shadow-sm py-4 ">
-        <div class="relative flex justify-center items-center px-4">
-        <div class="flex gap-6">  
+      <nav class=" flex items-center justify-between bg-white border-b-2 border-slate-200 shadow-sm py-4 px-6 ">
+
+      <div class="flex items-center flex-1">
+        <a href="/" class="flex items-center gap-2">
+          <img src="https://i.pinimg.com/736x/33/e7/84/33e78422d039ea20f2d1c09b67106f68.jpg" alt="Logo" class="h-8 w-auto" />
+          
+          <span class="font-bold text-lg text-slate-800 hidden sm:block">
+            TaskFlow
+          </span>
+        </a>
+      </div>
+
+        <div class="flex items-center justify-center gap-6">  
         <button
             @click="menuAktif='progress'"
             :class="menuAktif==='progress'?'bg-blue-50 text-blue-600 rounded-xl justify-center py-2 px-2 ' : 'text-slate-500 hover:bg-slate-50'"
@@ -47,10 +57,12 @@
           >
             Character & Word Counter
           </button>
-          </div>
+</div>
           @endverbatim
+          
+        <div class="flex items-center justify-end flex-1 gap-4">
           @auth
-        <div class="absolute right-4 flex items-center gap-4">
+          <div class="flex items-center gap-4">
           <img v-if="profil.foto_url" :src="profil.foto_url" :title="profil.name" alt="Foto profil" 
             class="w-10 h-10 rounded-full object-cover border-2 border-slate-200">
           <div v-else :title="profil.name" v-text="inisial" 
@@ -759,6 +771,7 @@
         });
 
           return {
+            sudahLogin,
             kumpulanList,
             listAktif,
             tambahListBaru,
